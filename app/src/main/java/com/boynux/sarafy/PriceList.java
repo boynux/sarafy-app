@@ -1,8 +1,21 @@
 package com.boynux.sarafy;
 
+import java.io.ByteArrayOutputStream;
+import java.io.Console;
+import java.io.IOException;
+import java.net.URL;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
+import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.ExecutionException;
+import java.util.logging.Logger;
+import java.util.zip.DataFormatException;
 
 import android.database.Cursor;
+import android.net.http.AndroidHttpClient;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -19,6 +32,16 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
 import android.widget.TextView;
+
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
+import org.apache.http.StatusLine;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 public class PriceList extends ActionBarActivity implements
 ActionBar.TabListener {
@@ -95,21 +118,30 @@ ActionBar.TabListener {
 
 	@Override
 	protected void onStart() {
-		super.onStart();
+        super.onStart();
 
-		mContract.updateExchangeRate("ExchangeRates", "USD", new String[] {
-				"32500", "26500", "1.4" });
-		mContract.updateExchangeRate("ExchangeRates", "GBP", new String[] {
-				"43800", "38500", "0.8" });
+        try {
+            ExchangeRate[] rates = getOnlineCommodityRates("http://forward-liberty-225.appspot.com/exchange-rates/average");
 
-		mContract.updateExchangeRate("GoldPrices", "Full coin", new String[] {
-				"11300000", "8540000", "0.7" });
-		mContract.updateExchangeRate("GoldPrices", "Half coin", new String[] {
-				"5850000", "4480000", "0.5" });
-		mContract.updateExchangeRate("GoldPrices", "18c", new String[] {
-				"9870000", "N/A", "0.5" });
-	}
+            for(ExchangeRate rate : rates)
+                mContract.updateExchangeRate("ExchangeRates", rate.To, rate.Rates);
 
+        } catch (Exception e) {
+            Logger.getAnonymousLogger().warning(String.format("could not retreive rates online [%s]", e.toString()));
+
+            mContract.updateExchangeRate("ExchangeRates", "USD", new String[]{
+                    "32500", "26500", "1.4"});
+            mContract.updateExchangeRate("ExchangeRates", "GBP", new String[]{
+                    "43800", "38500", "0.8"});
+
+            mContract.updateExchangeRate("GoldPrices", "Full coin", new String[]{
+                    "11300000", "8540000", "0.7"});
+            mContract.updateExchangeRate("GoldPrices", "Half coin", new String[]{
+                    "5850000", "4480000", "0.5"});
+            mContract.updateExchangeRate("GoldPrices", "18c", new String[]{
+                    "9870000", "N/A", "0.5"});
+        }
+    }
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		// Handle action bar item clicks here. The action bar will
@@ -140,6 +172,48 @@ ActionBar.TabListener {
 			FragmentTransaction fragmentTransaction) {
 	}
 
+    private ExchangeRate[] getOnlineCommodityRates(String url)
+            throws InterruptedException, ExecutionException, DataFormatException {
+        String ratesString = new RetrievePricesTask().execute(url).get();
+
+        Logger.getAnonymousLogger().info(ratesString);
+
+        try {
+            JSONArray json = new JSONArray(ratesString);
+            ArrayList<ExchangeRate> result = new ArrayList<ExchangeRate>();
+
+            for (int index = 0; index < json.length(); ++index) {
+                JSONObject set = json.getJSONObject(index);
+                for (int itemsIndex = 0; itemsIndex < set.names().length(); ++itemsIndex) {
+                    ExchangeRate rate = new ExchangeRate();
+                    NumberFormat format = DecimalFormat.getInstance(Locale.US);
+                    rate.From = set.names().getString(itemsIndex);
+                    rate.To = "USD";
+                    rate.Rates = new String[]{
+                        format.format(set.getJSONObject(rate.From).getDouble("USD")),
+                        format.format(set.getJSONObject(rate.From).getDouble("USD"))
+                    };
+
+                    result.add(rate);
+                }
+            }
+
+            ExchangeRate[] rates = new ExchangeRate[result.size()];
+            return result.toArray(rates);
+
+        } catch (JSONException e) {
+            Logger.getAnonymousLogger().warning(String.format("Can not fetch information from provided json object! [%s]", e));
+        }
+
+        throw new DataFormatException("Could not fetch information from json object.");
+    }
+
+    public class ExchangeRate
+    {
+        public String From;
+        public String To;
+        public String[] Rates;
+    }
 	/**
 	 * A {@link FragmentPagerAdapter} that returns a fragment corresponding to
 	 * one of the sections/tabs/pages.

@@ -4,13 +4,16 @@
     <string name="app_name">Sarafy</string>
     <string name="title_section1">Exchange Rates</string>
     <string name="title_section2">Gold Prices</string>
-    <string name="title_section3">Section 3</string>
+    <string name="title_section3">Disclaimer</string>
     <string name="action_settings">Settings</string>
     <string name="exchange_rates_title">Exchange Rates</string>
-	<string name="gold_prices_title">Gold Prices</string>
+    <string name="gold_prices_title">Gold Prices</string>
     <string name="disclaimer_text">Disclaimer</string>
-    <string name='commodity_title'>Commodity</string>
-    <string name='commodity_sell_price'>Sell</string>
-    <string name='commodity_buy_price'>Buy</string>
+    <string name="commodity_title">Commodity</string>
+    <string name="commodity_sell_price">Sell</string>
+    <string name="commodity_buy_price">Buy</string>
     <string name="commodity_change_rate">Changes</string>
+    <string name="title_activity_retrieve_prices_task">RetrievePricesTask</string>
+    <string name="hello_world">Hello world!</string>
+
 </resources>

@@ -8,6 +8,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:contentDescription="Disclaimer"
-        android:text="@string/disclaimer_text" />
+        android:text="@string/disclaimer_text"/>
 
 </ScrollView>
