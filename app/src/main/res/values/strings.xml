@@ -6,6 +6,7 @@
     <string name="title_section2">Gold Prices</string>
     <string name="title_section3">Disclaimer</string>
     <string name="action_settings">Settings</string>
+    <string name="action_refresh">Refresh</string>
     <string name="exchange_rates_title">Exchange Rates</string>
     <string name="gold_prices_title">Gold Prices</string>
     <string name="disclaimer_text">Disclaimer</string>

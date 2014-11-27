@@ -39,7 +39,7 @@ public class ExchangeRateContract {
 		return this;
 	}
 
-	public Cursor getComoditiesByCategory(String cat) {
+	public Cursor getCommoditiesByCategory(String cat) {
 		Cursor cursor = mDb.query(ExchangeEntry.TABLE_NAME,
 				new String[] {
 				ExchangeEntry.COLUMN_NAME_ID,

@@ -1,21 +1,23 @@
 package com.boynux.sarafy;
 
-import java.io.ByteArrayOutputStream;
-import java.io.Console;
-import java.io.IOException;
-import java.net.URL;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
-import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Logger;
 import java.util.zip.DataFormatException;
 
+import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.database.Cursor;
-import android.net.http.AndroidHttpClient;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -25,6 +27,7 @@ import android.support.v4.view.ViewPager;
 import android.support.v4.widget.SimpleCursorAdapter;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -33,18 +36,12 @@ import android.view.ViewGroup;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
-import org.apache.http.StatusLine;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 public class PriceList extends ActionBarActivity implements
-ActionBar.TabListener {
+ActionBar.TabListener, ActivityListener {
 
 	/**
 	 * The {@link android.support.v4.view.PagerAdapter} that will provide
@@ -59,6 +56,8 @@ ActionBar.TabListener {
 	 * The {@link ViewPager} that will host the section contents.
 	 */
 	ViewPager mViewPager;
+
+    ProgressDialog progress;
 
 	/**
 	 * Helper to insert/select exchange rates from SQLite database.
@@ -113,7 +112,7 @@ ActionBar.TabListener {
 
 		// Inflate the menu; this adds items to the action bar if it is present.
 		getMenuInflater().inflate(R.menu.main, menu);
-		return true;
+		return super.onCreateOptionsMenu(menu);
 	}
 
 	@Override
@@ -121,25 +120,10 @@ ActionBar.TabListener {
         super.onStart();
 
         try {
-            ExchangeRate[] rates = getOnlineCommodityRates("http://forward-liberty-225.appspot.com/exchange-rates/average");
-
-            for(ExchangeRate rate : rates)
-                mContract.updateExchangeRate("ExchangeRates", rate.To, rate.Rates);
+            refresh();
 
         } catch (Exception e) {
-            Logger.getAnonymousLogger().warning(String.format("could not retreive rates online [%s]", e.toString()));
-
-            mContract.updateExchangeRate("ExchangeRates", "USD", new String[]{
-                    "32500", "26500", "1.4"});
-            mContract.updateExchangeRate("ExchangeRates", "GBP", new String[]{
-                    "43800", "38500", "0.8"});
-
-            mContract.updateExchangeRate("GoldPrices", "Full coin", new String[]{
-                    "11300000", "8540000", "0.7"});
-            mContract.updateExchangeRate("GoldPrices", "Half coin", new String[]{
-                    "5850000", "4480000", "0.5"});
-            mContract.updateExchangeRate("GoldPrices", "18c", new String[]{
-                    "9870000", "N/A", "0.5"});
+            Logger.getAnonymousLogger().warning(String.format("could not retrieve rates online [%s]", e.toString()));
         }
     }
 	@Override
@@ -147,13 +131,40 @@ ActionBar.TabListener {
 		// Handle action bar item clicks here. The action bar will
 		// automatically handle clicks on the Home/Up button, so long
 		// as you specify a parent activity in AndroidManifest.xml.
-		int id = item.getItemId();
-		if (id == R.id.action_settings) {
-			return true;
-		}
-		return super.onOptionsItemSelected(item);
+		switch(item.getItemId()) {
+            case R.id.action_settings:
+                return true;
+            case R.id.action_refresh:
+                refresh();
+            default:
+                return super.onOptionsItemSelected(item);
+        }
 	}
 
+    public void refresh() {
+        try {
+            AsyncHttpRequest request = new AsyncHttpRequest(this);
+            request.execute("http://forward-liberty-225.appspot.com/exchange-rates/average");
+        } catch(Exception e) {
+            e.printStackTrace();
+            Logger.getAnonymousLogger().warning(String.format("could not retrieve rates online [%s]", e.toString()));
+        }
+    }
+
+    public void showAlertDialog(String title, String message) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage(message);
+        builder.setTitle(title);
+        builder.setPositiveButton("OK",new DialogInterface.OnClickListener() {
+
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                ;
+            }
+        });
+
+        builder.create().show();
+    }
 	@Override
 	public void onTabSelected(ActionBar.Tab tab,
 			FragmentTransaction fragmentTransaction) {
@@ -172,40 +183,105 @@ ActionBar.TabListener {
 			FragmentTransaction fragmentTransaction) {
 	}
 
-    private ExchangeRate[] getOnlineCommodityRates(String url)
+    private void processOnlineCommodityRates(String ratesString)
             throws InterruptedException, ExecutionException, DataFormatException {
-        String ratesString = new RetrievePricesTask().execute(url).get();
 
         Logger.getAnonymousLogger().info(ratesString);
 
-        try {
-            JSONArray json = new JSONArray(ratesString);
-            ArrayList<ExchangeRate> result = new ArrayList<ExchangeRate>();
+        // TODO: Consider moving this expression into related Fragment itself.
+        //       Might be easier to implement and communicate with Fragment.
+        new AsyncTask<String, Void, ExchangeRate[]> () {
 
-            for (int index = 0; index < json.length(); ++index) {
-                JSONObject set = json.getJSONObject(index);
-                for (int itemsIndex = 0; itemsIndex < set.names().length(); ++itemsIndex) {
-                    ExchangeRate rate = new ExchangeRate();
-                    NumberFormat format = DecimalFormat.getInstance(Locale.US);
-                    rate.From = set.names().getString(itemsIndex);
-                    rate.To = "USD";
-                    rate.Rates = new String[]{
-                        format.format(set.getJSONObject(rate.From).getDouble("USD")),
-                        format.format(set.getJSONObject(rate.From).getDouble("USD"))
-                    };
+            @Override
+            protected void onPreExecute() {
+                showProgress("Processing data...");
+            }
+            @Override
+            protected ExchangeRate[] doInBackground(String... params) {
+                try {
+                    JSONArray json = new JSONArray(params[0]);
+                    ArrayList<ExchangeRate> result = new ArrayList<ExchangeRate>();
 
-                    result.add(rate);
+                    for (int index = 0; index < json.length(); ++index) {
+                        JSONObject set = json.getJSONObject(index);
+                        for (int itemsIndex = 0; itemsIndex < set.names().length(); ++itemsIndex) {
+
+                            NumberFormat format = new DecimalFormat("###,###");
+
+                            String from = set.names().getString(itemsIndex);
+                            JSONObject setExchanges = set.getJSONObject(from);
+                            for (int itemIndexInner = 0; itemIndexInner < setExchanges.names().length(); ++itemIndexInner) {
+                                ExchangeRate rate = new ExchangeRate();
+
+                                rate.From = set.names().getString(itemsIndex);
+                                rate.To = setExchanges.names().getString(itemIndexInner);
+
+                                JSONObject responseRates = setExchanges.getJSONObject(rate.To);
+                                rate.Rates = new String[]{
+                                        format.format(responseRates.getDouble("BID")),
+                                        format.format(responseRates.getDouble("ASK"))
+                                };
+
+                                result.add(rate);
+                            }
+                        }
+                    }
+
+                    ExchangeRate[] rates = new ExchangeRate[result.size()];
+                    return result.toArray(rates);
+                } catch (JSONException e) {
+                    Logger.getAnonymousLogger().warning(String.format("Can not fetch information from provided json object! [%s]", e));
                 }
+
+                // TODO: inform user about the incident!
+                Log.e("WebService", "Could not fetch information from json object.");
+
+                return new ExchangeRate[0];
             }
 
-            ExchangeRate[] rates = new ExchangeRate[result.size()];
-            return result.toArray(rates);
+            @Override
+            protected void onPostExecute(ExchangeRate[] rates) {
+                Log.d("WebService", String.format("Updating [%d] commodity rates.", rates.length));
+                for (ExchangeRate rate : rates)
+                    mContract.updateExchangeRate("ExchangeRates", rate.To, rate.Rates);
 
-        } catch (JSONException e) {
-            Logger.getAnonymousLogger().warning(String.format("Can not fetch information from provided json object! [%s]", e));
+                hideProgress();
+                sendBroadcast(new Intent("DataChange"));
+            }
+        }.execute(ratesString);
+    }
+
+    @Override
+    public void onDataReady(Object data) {
+        if(data == "" || data == null) {
+            showAlertDialog("Error", "Could not access web service.\nPlease check Internet connection.");
+            return;
         }
 
-        throw new DataFormatException("Could not fetch information from json object.");
+        try {
+            Log.d("WebService", "Data is ready, processing data!");
+            processOnlineCommodityRates((String) data);
+        } catch (ExecutionException e) {
+            Log.w("WebService", e.toString());
+        } catch (InterruptedException e) {
+            Log.w("WebService", e.toString());
+        } catch (DataFormatException e) {
+            Log.w("WebService", e.toString());
+        }
+    }
+
+    @Override
+    public void showProgress(String message) {
+        hideProgress();
+
+        progress = ProgressDialog.show(this, "Wait", message);
+    }
+
+    @Override
+    public void hideProgress() {
+        if(progress != null && progress.isShowing()) {
+            progress.dismiss();
+        }
     }
 
     public class ExchangeRate
@@ -296,6 +372,18 @@ ActionBar.TabListener {
 			super.onStart();
 		};
 
+        @Override
+        public void onCreate(Bundle savedInstanceState) {
+            super.onCreate(savedInstanceState);
+        }
+
+        @Override
+        public void onAttach(Activity activity) {
+           super.onAttach(activity);
+
+           getActivity().registerReceiver(new FragmentReceiver(), new IntentFilter("DataChange"));
+        }
+
 		@Override
 		public View onCreateView(LayoutInflater inflater, ViewGroup container,
 				Bundle savedInstanceState) {
@@ -321,7 +409,7 @@ ActionBar.TabListener {
 				rootView = inflater.inflate(R.layout.fragment_excahage_rates,
 						container, false);
 				mCursor = mContract
-						.getComoditiesByCategory("ExchangeRates");
+						.getCommoditiesByCategory("ExchangeRates");
 
 				list = (ListView) rootView
 						.findViewById(R.id.exchangeRateListView);
@@ -330,7 +418,7 @@ ActionBar.TabListener {
 				rootView = inflater.inflate(R.layout.fragment_gold_price,
 						container, false);
 				mCursor = mContract
-						.getComoditiesByCategory("GoldPrices");
+						.getCommoditiesByCategory("GoldPrices");
 
 				list = (ListView) rootView
 						.findViewById(R.id.goldPricesListView);
@@ -370,37 +458,17 @@ ActionBar.TabListener {
 				};
 
 				list.setAdapter(mAdapter);
-				mAdapter = new SimpleCursorAdapter(getActivity(),
-						R.layout.exchange_rates_row, mCursor, dataColumns,
-						viewIds, 0) {
-					@Override
-					public void setViewText(TextView v, String text) {
-
-						switch (v.getId()) {
-						case R.id.commodity_buy_price:
-						case R.id.commodity_sell_price:
-							try {
-								super.setViewText(
-										v,
-										String.format("%,d",
-												Integer.parseInt(text)));
-							} catch (NumberFormatException e) {
-								super.setViewText(v, text);
-							}
-							break;
-						case R.id.commodity_change_price:
-							super.setViewText(v, String.format("%s%%", text));
-							break;
-						default:
-							super.setViewText(v, text);
-							break;
-						}
-					}
-				};
 			}
 
 			return rootView;
 		}
 
+        public class FragmentReceiver extends BroadcastReceiver {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                Log.d("Fragment", "Got it!");
+                PlaceholderFragment.this.mAdapter.changeCursor(mContract.getCommoditiesByCategory("ExchangeRates"));
+            }
+        }
 	}
 }
