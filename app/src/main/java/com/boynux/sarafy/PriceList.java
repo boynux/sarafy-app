@@ -272,9 +272,11 @@ ActionBar.TabListener, ActivityListener {
 
     @Override
     public void showProgress(String message) {
-        hideProgress();
-
-        progress = ProgressDialog.show(this, "Wait", message);
+        if(progress != null && progress.isShowing()) {
+            progress.setMessage(message);
+        } else {
+            progress = ProgressDialog.show(this, "Wait", message);
+        }
     }
 
     @Override
@@ -312,7 +314,7 @@ ActionBar.TabListener, ActivityListener {
 		@Override
 		public int getCount() {
 			// Show 3 total pages.
-			return 3;
+			return 2;
 		}
 
 		@Override
@@ -322,7 +324,7 @@ ActionBar.TabListener, ActivityListener {
 			case 0:
 				return getString(R.string.title_section1).toUpperCase(l);
 			case 1:
-				return getString(R.string.title_section2).toUpperCase(l);
+				return "Disclaimer".toUpperCase(l);
 			case 2:
 				return getString(R.string.title_section3).toUpperCase(l);
 			}
@@ -338,8 +340,8 @@ ActionBar.TabListener, ActivityListener {
 		 * Fragment type Enumeration.
 		 */
 		public enum Type {
-			ExchangeRate, GoldPrice, Disclaimer
-		};
+			ExchangeRate, Disclaimer, GoldPrice
+        };
 
 		/**
 		 * The fragment argument representing the section number for this
@@ -467,7 +469,9 @@ ActionBar.TabListener, ActivityListener {
             @Override
             public void onReceive(Context context, Intent intent) {
                 Log.d("Fragment", "Got it!");
-                PlaceholderFragment.this.mAdapter.changeCursor(mContract.getCommoditiesByCategory("ExchangeRates"));
+                if(PlaceholderFragment.this.mAdapter != null) {
+                    PlaceholderFragment.this.mAdapter.changeCursor(mContract.getCommoditiesByCategory("ExchangeRates"));
+                }
             }
         }
 	}
