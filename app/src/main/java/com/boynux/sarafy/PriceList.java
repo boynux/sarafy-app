@@ -402,9 +402,11 @@ ActionBar.TabListener, ActivityListener {
 					ExchangeRateContract.ExchangeEntry.COLUMN_NAME_TITLE,
 					ExchangeRateContract.ExchangeEntry.COLUMN_NAME_VALUE1,
 					ExchangeRateContract.ExchangeEntry.COLUMN_NAME_VALUE2,
-					ExchangeRateContract.ExchangeEntry.COLUMN_NAME_VALUE3 };
+					ExchangeRateContract.ExchangeEntry.COLUMN_NAME_VALUE3,
+                    ExchangeRateContract.ExchangeEntry.COLUMN_NAME_LAST_UPDATE, };
 			int[] viewIds = { R.id.commodity_title, R.id.commodity_buy_price,
-					R.id.commodity_sell_price, R.id.commodity_change_price };
+					R.id.commodity_sell_price, R.id.commodity_change_price,
+                    R.id.commodity_last_update };
 
 			switch (sectionType) {
 			case ExchangeRate:
@@ -452,6 +454,9 @@ ActionBar.TabListener, ActivityListener {
 						case R.id.commodity_change_price:
 							super.setViewText(v, String.format("%s%%", text));
 							break;
+                        case R.id.commodity_last_update:
+                            super.setViewText(v, text);
+                            break;
 						default:
 							super.setViewText(v, text);
 							break;
