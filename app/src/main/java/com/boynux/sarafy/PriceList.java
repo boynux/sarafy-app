@@ -23,6 +23,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.SimpleCursorAdapter;
 import android.support.v7.app.ActionBar;
@@ -33,6 +34,9 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -59,6 +63,9 @@ ActionBar.TabListener, ActivityListener {
 
     ProgressDialog progress;
 
+    MenuItem refreshItem;
+
+    Animation refreshAnimation;
 	/**
 	 * Helper to insert/select exchange rates from SQLite database.
 	 */
@@ -109,23 +116,40 @@ ActionBar.TabListener, ActivityListener {
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-
 		// Inflate the menu; this adds items to the action bar if it is present.
 		getMenuInflater().inflate(R.menu.main, menu);
+
+        final Menu m = menu;
+
+        refreshItem = menu.findItem(R.id.action_refresh);
+        refreshItem.setActionView(R.layout.refresh_action_view);
+        // menu.performIdentifierAction(refreshItem.getItemId(), 0);
+        refreshAnimation = AnimationUtils.loadAnimation(PriceList.this, R.anim.rotate_cw);
+        refreshAnimation.setRepeatCount(Animation.INFINITE);
+
+        refreshItem.getActionView().setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                m.performIdentifierAction(refreshItem.getItemId(), 0);
+            }
+        });
+
 		return super.onCreateOptionsMenu(menu);
 	}
 
 	@Override
 	protected void onStart() {
         super.onStart();
-
-        try {
-            refresh();
-
-        } catch (Exception e) {
-            Logger.getAnonymousLogger().warning(String.format("could not retrieve rates online [%s]", e.toString()));
-        }
     }
+
+    @Override
+    protected void onResume()
+    {
+        super.onResume();
+
+        refresh();
+    }
+
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		// Handle action bar item clicks here. The action bar will
@@ -272,7 +296,9 @@ ActionBar.TabListener, ActivityListener {
 
     @Override
     public void showProgress(String message) {
-        if(progress != null && progress.isShowing()) {
+        if(refreshItem != null && refreshItem.getActionView() != null) {
+            refreshItem.getActionView().startAnimation(refreshAnimation);
+        } else if(progress != null && progress.isShowing()) {
             progress.setMessage(message);
         } else {
             progress = ProgressDialog.show(this, "Wait", message);
@@ -283,6 +309,8 @@ ActionBar.TabListener, ActivityListener {
     public void hideProgress() {
         if(progress != null && progress.isShowing()) {
             progress.dismiss();
+        } else if(refreshItem != null && refreshItem.getActionView() != null) {
+            refreshItem.getActionView().clearAnimation();
         }
     }
 

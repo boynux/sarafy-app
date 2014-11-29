@@ -32,14 +32,14 @@
             android:paddingBottom="3dp">
 
             <TextView
-                android:id="@+id/commodity_buy_price"
+                android:id="@+id/commodity_sell_price"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
                 android:layout_weight="1" />
 
             <TextView
-                android:id="@+id/commodity_sell_price"
+                android:id="@+id/commodity_buy_price"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"

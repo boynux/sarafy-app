@@ -16,5 +16,6 @@
     <string name="commodity_change_rate">Changes</string>
     <string name="title_activity_retrieve_prices_task">RetrievePricesTask</string>
     <string name="hello_world">Hello world!</string>
+    <string name="refresh_action_description">Refresh action</string>
 
 </resources>
