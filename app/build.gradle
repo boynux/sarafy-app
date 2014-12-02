@@ -5,7 +5,7 @@ android {
     buildToolsVersion '20.0.0'
     defaultConfig {
         applicationId 'com.boynux.sarafy'
-        minSdkVersion 16
+        minSdkVersion 7
         targetSdkVersion 19
     }
     buildTypes {

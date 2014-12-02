@@ -2,12 +2,15 @@ package com.boynux.sarafy;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Locale;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Logger;
 import java.util.zip.DataFormatException;
 
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
@@ -17,6 +20,13 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.Cursor;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.GradientDrawable;
+import android.graphics.drawable.LayerDrawable;
+import android.graphics.drawable.ShapeDrawable;
+import android.graphics.drawable.shapes.RectShape;
+import android.graphics.drawable.shapes.RoundRectShape;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -37,6 +47,7 @@ import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -122,12 +133,13 @@ ActionBar.TabListener, ActivityListener {
         final Menu m = menu;
 
         refreshItem = menu.findItem(R.id.action_refresh);
-        refreshItem.setActionView(R.layout.refresh_action_view);
+        MenuItemCompat.setActionView(refreshItem, R.layout.refresh_action_view);
+        // refreshItem.setActionView(R.layout.refresh_action_view);
         // menu.performIdentifierAction(refreshItem.getItemId(), 0);
         refreshAnimation = AnimationUtils.loadAnimation(PriceList.this, R.anim.rotate_cw);
         refreshAnimation.setRepeatCount(Animation.INFINITE);
 
-        refreshItem.getActionView().setOnClickListener(new View.OnClickListener() {
+        MenuItemCompat.getActionView(refreshItem).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 m.performIdentifierAction(refreshItem.getItemId(), 0);
@@ -241,9 +253,11 @@ ActionBar.TabListener, ActivityListener {
                                 rate.To = setExchanges.names().getString(itemIndexInner);
 
                                 JSONObject responseRates = setExchanges.getJSONObject(rate.To);
+                                rate.LastUpdate = responseRates.getString("LastUpdate");
+                                rate.Changes = responseRates.getDouble("Changes");
                                 rate.Rates = new String[]{
                                         format.format(responseRates.getDouble("BID")),
-                                        format.format(responseRates.getDouble("ASK"))
+                                        format.format(responseRates.getDouble("ASK")),
                                 };
 
                                 result.add(rate);
@@ -267,7 +281,7 @@ ActionBar.TabListener, ActivityListener {
             protected void onPostExecute(ExchangeRate[] rates) {
                 Log.d("WebService", String.format("Updating [%d] commodity rates.", rates.length));
                 for (ExchangeRate rate : rates)
-                    mContract.updateExchangeRate("ExchangeRates", rate.To, rate.Rates);
+                    mContract.updateExchangeRate("ExchangeRates", rate.To, rate.Rates, rate.Changes, rate.LastUpdate);
 
                 hideProgress();
                 sendBroadcast(new Intent("DataChange"));
@@ -296,8 +310,8 @@ ActionBar.TabListener, ActivityListener {
 
     @Override
     public void showProgress(String message) {
-        if(refreshItem != null && refreshItem.getActionView() != null) {
-            refreshItem.getActionView().startAnimation(refreshAnimation);
+        if(refreshItem != null && MenuItemCompat.getActionView(refreshItem) != null) {
+            MenuItemCompat.getActionView(refreshItem).startAnimation(refreshAnimation);
         } else if(progress != null && progress.isShowing()) {
             progress.setMessage(message);
         } else {
@@ -309,8 +323,10 @@ ActionBar.TabListener, ActivityListener {
     public void hideProgress() {
         if(progress != null && progress.isShowing()) {
             progress.dismiss();
-        } else if(refreshItem != null && refreshItem.getActionView() != null) {
-            refreshItem.getActionView().clearAnimation();
+        }
+
+       if(refreshItem != null && MenuItemCompat.getActionView(refreshItem) != null) {
+            MenuItemCompat.getActionView(refreshItem).clearAnimation();
         }
     }
 
@@ -319,6 +335,8 @@ ActionBar.TabListener, ActivityListener {
         public String From;
         public String To;
         public String[] Rates;
+        public Double Changes = 0.0;
+        public String LastUpdate = new SimpleDateFormat(ExchangeRateContract.ExchangeEntry.DATE_FORMAT).format(new Date());
     }
 	/**
 	 * A {@link FragmentPagerAdapter} that returns a fragment corresponding to
@@ -418,7 +436,7 @@ ActionBar.TabListener, ActivityListener {
 		public View onCreateView(LayoutInflater inflater, ViewGroup container,
 				Bundle savedInstanceState) {
 
-			View rootView;
+			final View rootView;
 			ListView list = null;
 			mContract = new ExchangeRateContract(
 					getActivity());
@@ -430,7 +448,7 @@ ActionBar.TabListener, ActivityListener {
 					ExchangeRateContract.ExchangeEntry.COLUMN_NAME_TITLE,
 					ExchangeRateContract.ExchangeEntry.COLUMN_NAME_VALUE1,
 					ExchangeRateContract.ExchangeEntry.COLUMN_NAME_VALUE2,
-					ExchangeRateContract.ExchangeEntry.COLUMN_NAME_VALUE3,
+					ExchangeRateContract.ExchangeEntry.COLUMN_NAME_CHANGES,
                     ExchangeRateContract.ExchangeEntry.COLUMN_NAME_LAST_UPDATE, };
 			int[] viewIds = { R.id.commodity_title, R.id.commodity_buy_price,
 					R.id.commodity_sell_price, R.id.commodity_change_price,
@@ -465,32 +483,49 @@ ActionBar.TabListener, ActivityListener {
 			if (list != null) {
 				mAdapter = new SimpleCursorAdapter(getActivity(),
 						R.layout.exchange_rates_row, mCursor, dataColumns,
-						viewIds, 0) {
-					@Override
-					public void setViewText(TextView v, String text) {
+						viewIds, 0);
 
-						switch (v.getId()) {
-						case R.id.commodity_buy_price:
-						case R.id.commodity_sell_price:
-							try {
-								super.setViewText(v, String.format("%,d",
-										Integer.parseInt(text)));
-							} catch (NumberFormatException e) {
-								super.setViewText(v, text);
-							}
-							break;
-						case R.id.commodity_change_price:
-							super.setViewText(v, String.format("%s%%", text));
-							break;
-                        case R.id.commodity_last_update:
-                            super.setViewText(v, text);
-                            break;
-						default:
-							super.setViewText(v, text);
-							break;
-						}
-					}
-				};
+                mAdapter.setViewBinder(new SimpleCursorAdapter.ViewBinder() {
+                    @Override
+                    public boolean setViewValue(View view, Cursor cursor, int i) {
+                        switch(view.getId()) {
+                            case R.id.commodity_change_price:
+                                Drawable background = getResources().getDrawable(R.drawable.selector_card_background);
+                                Double d = cursor.getDouble(i) * 100;
+                                d = 0.0;
+
+                                if (d < -0.01) {
+                                    background = getResources().getDrawable(R.drawable.selector_card_background_negative);
+                                } else if (d > 0.01) {
+                                    background = getResources().getDrawable(R.drawable.selector_card_background_positive);
+                                }
+
+                                int sdk = android.os.Build.VERSION.SDK_INT;
+                                if (sdk < android.os.Build.VERSION_CODES.JELLY_BEAN) {
+                                    ((LinearLayout) view.getParent().getParent()).setBackgroundDrawable(background);
+                                } else {
+                                    ((LinearLayout) view.getParent().getParent()).setBackground(background);
+                                }
+
+                                // setBackground resets padding!
+                                ((LinearLayout) view.getParent().getParent()).setPadding(
+                                        (int)getResources().getDimensionPixelSize(R.dimen.card_padding_all),
+                                        (int)getResources().getDimensionPixelSize(R.dimen.card_padding_all),
+                                        (int)getResources().getDimensionPixelSize(R.dimen.card_padding_all),
+                                        (int)getResources().getDimensionPixelSize(R.dimen.card_padding_all)
+                                );
+
+                                Log.d("ViewBinder", String.format("%d", i));
+
+                                DecimalFormat format = new DecimalFormat("#0.00");
+                                ((TextView)view).setText(String.format("%s%%", format.format(d)));
+                                return true;
+                            default:
+                                return false;
+
+                        }
+                    }
+                });
 
 				list.setAdapter(mAdapter);
 			}

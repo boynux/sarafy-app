@@ -24,7 +24,7 @@ public class ExchangeRateContract {
 
 	private static final String TEXT_TYPE = " TEXT";
     private static final String DATE_TIME_TYPE = " DATETIME";
-    private static final String DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
+    private static final String DOUBLE_TYPE = " REAL";
 	private static final String COMMA_SEP = ", ";
 	private static final String SQL_CREATE_ENTRIES = "CREATE TABLE "
 			+ ExchangeEntry.TABLE_NAME + " (" + ExchangeEntry._ID
@@ -34,7 +34,8 @@ public class ExchangeRateContract {
 			+ TEXT_TYPE + COMMA_SEP + ExchangeEntry.COLUMN_NAME_VALUE2
 			+ TEXT_TYPE + COMMA_SEP + ExchangeEntry.COLUMN_NAME_VALUE3
 			+ TEXT_TYPE + COMMA_SEP + ExchangeEntry.COLUMN_NAME_LAST_UPDATE
-            + DATE_TIME_TYPE + ")";
+            + DATE_TIME_TYPE +  COMMA_SEP + ExchangeEntry.COLUMN_NAME_CHANGES
+            + DOUBLE_TYPE + ")";
 
 	private static final String SQL_DELETE_ENTRIES = "DROP TABLE IF EXISTS "
 			+ ExchangeEntry.TABLE_NAME;
@@ -54,6 +55,7 @@ public class ExchangeRateContract {
 				ExchangeEntry.COLUMN_NAME_VALUE1,
 				ExchangeEntry.COLUMN_NAME_VALUE2,
 				ExchangeEntry.COLUMN_NAME_VALUE3,
+                 ExchangeEntry.COLUMN_NAME_CHANGES,
                 ExchangeEntry.COLUMN_NAME_LAST_UPDATE },
 				ExchangeEntry.COLUMN_NAME_CATEGORY + "= ?",
 				new String[] { cat }, null, null, null, null);
@@ -62,7 +64,7 @@ public class ExchangeRateContract {
 	}
 
 	public boolean updateExchangeRate(String cat, String title,
-			String[] commodityValues) {
+			String[] commodityValues, Double changes, String lastUpdate) {
 		Cursor cursor = mDb.query(true, ExchangeEntry.TABLE_NAME,
 				new String[] { ExchangeEntry.COLUMN_NAME_ID },
 				ExchangeEntry.COLUMN_NAME_CATEGORY + "= ? AND " + ExchangeEntry.COLUMN_NAME_TITLE + "= ?",
@@ -74,7 +76,8 @@ public class ExchangeRateContract {
 		values.put(ExchangeEntry.COLUMN_NAME_VALUE1, commodityValues.length > 0 ? commodityValues[0] : "-");
 		values.put(ExchangeEntry.COLUMN_NAME_VALUE2, commodityValues.length > 1 ? commodityValues[1] : "-");
 		values.put(ExchangeEntry.COLUMN_NAME_VALUE3, commodityValues.length > 2  ? commodityValues[2] : "-");
-        values.put(ExchangeEntry.COLUMN_NAME_LAST_UPDATE, new SimpleDateFormat(DATE_FORMAT).format(new Date()));
+        values.put(ExchangeEntry.COLUMN_NAME_CHANGES, changes);
+        values.put(ExchangeEntry.COLUMN_NAME_LAST_UPDATE, lastUpdate);
 
 		if (cursor.moveToFirst()) {
 			mDb.update(ExchangeEntry.TABLE_NAME, values, ExchangeEntry.COLUMN_NAME_ID + "=" + cursor.getLong(0), null);
@@ -87,40 +90,42 @@ public class ExchangeRateContract {
 	}
 
 	public class ExchangeRateDbHelper extends SQLiteOpenHelper {
-		public static final int DATABASE_VERSION = 3;
-		public static final String DATABASE_NAME = "ExchangeRate.db";
+		public static final int DATABASE_VERSION = 4;
+        public static final String DATABASE_NAME = "ExchangeRate.db";
 
-		public ExchangeRateDbHelper(Context context) {
-			super(context, DATABASE_NAME, null, DATABASE_VERSION);
-		}
+        public ExchangeRateDbHelper(Context context) {
+            super(context, DATABASE_NAME, null, DATABASE_VERSION);
+        }
 
-		@Override
-		public void onCreate(SQLiteDatabase db) {
-			db.execSQL(SQL_CREATE_ENTRIES);
-		}
+        @Override
+        public void onCreate(SQLiteDatabase db) {
+            db.execSQL(SQL_CREATE_ENTRIES);
+        }
 
-		@Override
-		public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-			db.execSQL(SQL_DELETE_ENTRIES);
-			onCreate(db);
-		}
+        @Override
+        public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+            db.execSQL(SQL_DELETE_ENTRIES);
+            onCreate(db);
+        }
 
-		@Override
-		public void onDowngrade(SQLiteDatabase db, int oldVersion,
-				int newVersion) {
-			onUpgrade(db, oldVersion, newVersion);
-		}
-	}
+        @Override
+        public void onDowngrade(SQLiteDatabase db, int oldVersion,
+                                int newVersion) {
+            onUpgrade(db, oldVersion, newVersion);
+        }
+    }
 
-	public static abstract class ExchangeEntry implements BaseColumns {
-		public static final String AUTHORITY = "com.boynux.sarafy";
-		public static final String TABLE_NAME = "entry";
-		public static final String COLUMN_NAME_ID = "_id";
-		public static final String COLUMN_NAME_CATEGORY = "category";
-		public static final String COLUMN_NAME_TITLE = "title";
-		public static final String COLUMN_NAME_VALUE1 = "value1";
-		public static final String COLUMN_NAME_VALUE2 = "value2";
-		public static final String COLUMN_NAME_VALUE3 = "value3";
+    public static abstract class ExchangeEntry implements BaseColumns {
+        public static final String AUTHORITY = "com.boynux.sarafy";
+        public static final String DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
+        public static final String TABLE_NAME = "entry";
+        public static final String COLUMN_NAME_ID = "_id";
+        public static final String COLUMN_NAME_CATEGORY = "category";
+        public static final String COLUMN_NAME_TITLE = "title";
+        public static final String COLUMN_NAME_VALUE1 = "value1";
+        public static final String COLUMN_NAME_VALUE2 = "value2";
+        public static final String COLUMN_NAME_VALUE3 = "value3";
+        public static final String COLUMN_NAME_CHANGES = "changes";
         public static final String COLUMN_NAME_LAST_UPDATE = "last_update";
 	}
 }

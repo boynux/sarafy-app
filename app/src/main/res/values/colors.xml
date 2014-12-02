@@ -3,4 +3,6 @@
     <color name="second_grey">#ff999999</color>
     <color name="card_shadow">#8c666666</color>
     <color name="card_white">#ffffffff</color>
+    <color name="rate_change_negative_indicator">#fff9bec7</color>
+    <color name="rate_change_positive_indicator">#ffb6fcd5</color>
 </resources>
