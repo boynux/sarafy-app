@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <string name="app_name">Sarafy</string>
+    <string name="app_name">Zagros</string>
     <string name="title_section1">Exchange Rates</string>
     <string name="title_section2">Gold Prices</string>
     <string name="title_section3">Disclaimer</string>
@@ -9,7 +9,6 @@
     <string name="action_refresh">Refresh</string>
     <string name="exchange_rates_title">Exchange Rates</string>
     <string name="gold_prices_title">Gold Prices</string>
-    <string name="disclaimer_text">Disclaimer</string>
     <string name="commodity_title">Commodity</string>
     <string name="commodity_sell_price">Sell</string>
     <string name="commodity_buy_price">Buy</string>
@@ -17,5 +16,17 @@
     <string name="title_activity_retrieve_prices_task">RetrievePricesTask</string>
     <string name="hello_world">Hello world!</string>
     <string name="refresh_action_description">Refresh action</string>
+    <string name="disclaimer_text">
+        THIS APPLICATION IS PROVIDED AS-IS.
+        ALL DATA PROVIDED HERE ARE COLLECTED FROM VARIOUS SOURCES FROM INTERNET AND WE DON NOT GUARANTEE ITS TRUTH.
+        THIS APPLICATION MIGHT NOT FIT TO ANY PARTICULAR PURPOSE.
+        BY USING THIS APP YOU ACCEPT ALL TERMS AND CONDITIONS.
+        WE AS DEVELOPER OF THIS APPLICATION DO NOT ACCEPT ANY LIABILITY
+        OF ANY KIND FOR AMY KID OF DAMAGE OR LOSS CAUSED DIRECTLY OR INDIRECTLY FROM USING THIS APPLICATION.
+        WE SHALL STOP SUPPORTING THIS APPLICATION AND STOP TO PROVIDED UPDATED INFORMATION FOR THIS APPLICATION
+        WITHOUT ANY PRIOR NOTICE AND WITHOUT PROVIDING ANY PARTICULAR REASON.
+        USING IT AT YOUR OWN RISK.
+    </string>
+    <string name="commodity_last_update">Last update: </string>
 
 </resources>

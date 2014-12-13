@@ -9,6 +9,7 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context=".MainActivity$PlaceholderFragment"
     android:orientation="vertical"
+    android:background="#ffeeeeee"
     android:gravity="top">
 
     <ListView

@@ -33,6 +33,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.SimpleCursorAdapter;
@@ -232,6 +233,7 @@ ActionBar.TabListener, ActivityListener {
             protected void onPreExecute() {
                 showProgress("Processing data...");
             }
+
             @Override
             protected ExchangeRate[] doInBackground(String... params) {
                 try {
@@ -247,6 +249,10 @@ ActionBar.TabListener, ActivityListener {
                             String from = set.names().getString(itemsIndex);
                             JSONObject setExchanges = set.getJSONObject(from);
                             for (int itemIndexInner = 0; itemIndexInner < setExchanges.names().length(); ++itemIndexInner) {
+                                if (setExchanges.names().getString(itemIndexInner).equals("FLAGS")) {
+                                    continue;
+                                }
+
                                 ExchangeRate rate = new ExchangeRate();
 
                                 rate.From = set.names().getString(itemsIndex);
@@ -370,7 +376,7 @@ ActionBar.TabListener, ActivityListener {
 			case 0:
 				return getString(R.string.title_section1).toUpperCase(l);
 			case 1:
-				return "Disclaimer".toUpperCase(l);
+				return getString(R.string.title_section3).toUpperCase(l);
 			case 2:
 				return getString(R.string.title_section3).toUpperCase(l);
 			}
@@ -398,6 +404,7 @@ ActionBar.TabListener, ActivityListener {
 		private SimpleCursorAdapter mAdapter;
 		private ExchangeRateContract mContract;
 		private Cursor mCursor;
+        private BroadcastReceiver mBroadcastReceiver;
 		/**
 		 * mDbHelper Returns a new instance of this fragment for the given
 		 * section number.
@@ -423,115 +430,87 @@ ActionBar.TabListener, ActivityListener {
         @Override
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
+
+            mBroadcastReceiver = new FragmentReceiver();
         }
 
         @Override
         public void onAttach(Activity activity) {
            super.onAttach(activity);
 
-           getActivity().registerReceiver(new FragmentReceiver(), new IntentFilter("DataChange"));
+            LocalBroadcastManager.getInstance(getActivity()).registerReceiver(
+                mBroadcastReceiver, new IntentFilter("DataChange")
+            );
         }
+
+        @Override
+        public void onDetach() {
+            LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(mBroadcastReceiver);
+
+            super.onDetach();
+        }
+
 
 		@Override
 		public View onCreateView(LayoutInflater inflater, ViewGroup container,
 				Bundle savedInstanceState) {
 
-			final View rootView;
-			ListView list = null;
-			mContract = new ExchangeRateContract(
-					getActivity());
-			mContract.open();
+            final View rootView;
+            ListView list = null;
+            mContract = new ExchangeRateContract(
+                    getActivity());
+            mContract.open();
 
-			sectionType = Type.values()[getArguments().getInt(ARG_SECTION_TYPE)];
+            sectionType = Type.values()[getArguments().getInt(ARG_SECTION_TYPE)];
 
-			String[] dataColumns = {
-					ExchangeRateContract.ExchangeEntry.COLUMN_NAME_TITLE,
-					ExchangeRateContract.ExchangeEntry.COLUMN_NAME_VALUE1,
-					ExchangeRateContract.ExchangeEntry.COLUMN_NAME_VALUE2,
-					ExchangeRateContract.ExchangeEntry.COLUMN_NAME_CHANGES,
-                    ExchangeRateContract.ExchangeEntry.COLUMN_NAME_LAST_UPDATE, };
-			int[] viewIds = { R.id.commodity_title, R.id.commodity_buy_price,
-					R.id.commodity_sell_price, R.id.commodity_change_price,
-                    R.id.commodity_last_update };
+            String[] dataColumns = {
+                    ExchangeRateContract.ExchangeEntry.COLUMN_NAME_TITLE,
+                    ExchangeRateContract.ExchangeEntry.COLUMN_NAME_VALUE1,
+                    ExchangeRateContract.ExchangeEntry.COLUMN_NAME_VALUE2,
+                    ExchangeRateContract.ExchangeEntry.COLUMN_NAME_CHANGES,
+                    ExchangeRateContract.ExchangeEntry.COLUMN_NAME_LAST_UPDATE,};
+            int[] viewIds = {R.id.commodity_title, R.id.commodity_buy_price,
+                    R.id.commodity_sell_price, R.id.commodity_change_price,
+                    R.id.commodity_last_update};
 
-			switch (sectionType) {
-			case ExchangeRate:
-				rootView = inflater.inflate(R.layout.fragment_excahage_rates,
-						container, false);
-				mCursor = mContract
-						.getCommoditiesByCategory("ExchangeRates");
+            switch (sectionType) {
+                case ExchangeRate:
+                    rootView = inflater.inflate(R.layout.fragment_excahage_rates,
+                            container, false);
+                    mCursor = mContract
+                            .getCommoditiesByCategory("ExchangeRates");
 
-				list = (ListView) rootView
-						.findViewById(R.id.exchangeRateListView);
-				break;
-			case GoldPrice:
-				rootView = inflater.inflate(R.layout.fragment_gold_price,
-						container, false);
-				mCursor = mContract
-						.getCommoditiesByCategory("GoldPrices");
+                    list = (ListView) rootView
+                            .findViewById(R.id.exchangeRateListView);
+                    break;
+                case GoldPrice:
+                    rootView = inflater.inflate(R.layout.fragment_gold_price,
+                            container, false);
+                    mCursor = mContract
+                            .getCommoditiesByCategory("GoldPrices");
 
-				list = (ListView) rootView
-						.findViewById(R.id.goldPricesListView);
-				break;
+                    list = (ListView) rootView
+                            .findViewById(R.id.goldPricesListView);
+                    break;
 
-			default:
-				rootView = inflater.inflate(R.layout.disclaimer, container,
-						false);
-				break;
-			}
+                default:
+                    rootView = inflater.inflate(R.layout.disclaimer, container,
+                            false);
+                    break;
+            }
 
-			if (list != null) {
-				mAdapter = new SimpleCursorAdapter(getActivity(),
-						R.layout.exchange_rates_row, mCursor, dataColumns,
-						viewIds, 0);
+            if (list != null) {
+                mAdapter = new SimpleCursorAdapter(getActivity(),
+                        R.layout.exchange_rates_row, mCursor, dataColumns,
+                        viewIds, 0);
 
-                mAdapter.setViewBinder(new SimpleCursorAdapter.ViewBinder() {
-                    @Override
-                    public boolean setViewValue(View view, Cursor cursor, int i) {
-                        switch(view.getId()) {
-                            case R.id.commodity_change_price:
-                                Drawable background = getResources().getDrawable(R.drawable.selector_card_background);
-                                Double d = cursor.getDouble(i) * 100;
-                                d = 0.0;
+                mAdapter.setViewBinder(new ExchangeRateBinder());
 
-                                if (d < -0.01) {
-                                    background = getResources().getDrawable(R.drawable.selector_card_background_negative);
-                                } else if (d > 0.01) {
-                                    background = getResources().getDrawable(R.drawable.selector_card_background_positive);
-                                }
+                list.setAdapter(mAdapter);
+            }
 
-                                int sdk = android.os.Build.VERSION.SDK_INT;
-                                if (sdk < android.os.Build.VERSION_CODES.JELLY_BEAN) {
-                                    ((LinearLayout) view.getParent().getParent()).setBackgroundDrawable(background);
-                                } else {
-                                    ((LinearLayout) view.getParent().getParent()).setBackground(background);
-                                }
-
-                                // setBackground resets padding!
-                                ((LinearLayout) view.getParent().getParent()).setPadding(
-                                        (int)getResources().getDimensionPixelSize(R.dimen.card_padding_all),
-                                        (int)getResources().getDimensionPixelSize(R.dimen.card_padding_all),
-                                        (int)getResources().getDimensionPixelSize(R.dimen.card_padding_all),
-                                        (int)getResources().getDimensionPixelSize(R.dimen.card_padding_all)
-                                );
-
-                                Log.d("ViewBinder", String.format("%d", i));
-
-                                DecimalFormat format = new DecimalFormat("#0.00");
-                                ((TextView)view).setText(String.format("%s%%", format.format(d)));
-                                return true;
-                            default:
-                                return false;
-
-                        }
-                    }
-                });
-
-				list.setAdapter(mAdapter);
-			}
-
-			return rootView;
-		}
+            return rootView;
+        }
 
         public class FragmentReceiver extends BroadcastReceiver {
             @Override
