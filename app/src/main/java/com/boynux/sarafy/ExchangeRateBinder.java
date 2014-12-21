@@ -6,6 +6,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.text.format.DateUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
@@ -13,10 +14,18 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.support.v4.widget.SimpleCursorAdapter.ViewBinder;
 
+import org.apache.http.impl.cookie.DateParseException;
+
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.text.DateFormat;
 import java.text.DecimalFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
+import java.util.TimeZone;
 import java.util.concurrent.ExecutionException;
 
 /**
@@ -26,6 +35,19 @@ public class ExchangeRateBinder implements ViewBinder {
     @Override
     public boolean setViewValue(View view, Cursor cursor, int i) {
         switch(view.getId()) {
+            case R.id.commodity_last_update:
+                DateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                try {
+                    dateFormatter.setTimeZone(TimeZone.getTimeZone("UTC"));
+                    Date date = dateFormatter.parse(cursor.getString(i));
+                    dateFormatter.setTimeZone(TimeZone.getDefault());
+                    ((TextView)view).setText(dateFormatter.format(date));
+
+                    return true;
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+                return false;
             case R.id.commodity_change_price:
                 Drawable background = view.getResources().getDrawable(R.drawable.selector_card_background);
                 Double d = cursor.getDouble(i) * 100;
