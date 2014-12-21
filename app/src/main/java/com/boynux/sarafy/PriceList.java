@@ -241,34 +241,22 @@ ActionBar.TabListener, ActivityListener {
                     ArrayList<ExchangeRate> result = new ArrayList<ExchangeRate>();
 
                     for (int index = 0; index < json.length(); ++index) {
-                        JSONObject set = json.getJSONObject(index);
-                        for (int itemsIndex = 0; itemsIndex < set.names().length(); ++itemsIndex) {
+                        JSONObject item = json.getJSONObject(index);
+                        NumberFormat format = new DecimalFormat("###,###");
 
-                            NumberFormat format = new DecimalFormat("###,###");
+                        ExchangeRate rate = new ExchangeRate();
 
-                            String from = set.names().getString(itemsIndex);
-                            JSONObject setExchanges = set.getJSONObject(from);
-                            for (int itemIndexInner = 0; itemIndexInner < setExchanges.names().length(); ++itemIndexInner) {
-                                if (setExchanges.names().getString(itemIndexInner).equals("FLAGS")) {
-                                    continue;
-                                }
+                        rate.From = item.getString("fr");
+                        rate.To = item.getString("to");
+                        rate.LastUpdate = item.getString("date");
+                        rate.Changes = item.getDouble("changes");
+                        rate.Rates = new String[]{
+                                format.format(item.getDouble("bid")),
+                                format.format(item.getDouble("ask")),
+                        };
+                        rate.ToFlagURL = item.getString("flag_url");
 
-                                ExchangeRate rate = new ExchangeRate();
-
-                                rate.From = set.names().getString(itemsIndex);
-                                rate.To = setExchanges.names().getString(itemIndexInner);
-
-                                JSONObject responseRates = setExchanges.getJSONObject(rate.To);
-                                rate.LastUpdate = responseRates.getString("LastUpdate");
-                                rate.Changes = responseRates.getDouble("Changes");
-                                rate.Rates = new String[]{
-                                        format.format(responseRates.getDouble("BID")),
-                                        format.format(responseRates.getDouble("ASK")),
-                                };
-
-                                result.add(rate);
-                            }
-                        }
+                        result.add(rate);
                     }
 
                     ExchangeRate[] rates = new ExchangeRate[result.size()];
@@ -287,10 +275,10 @@ ActionBar.TabListener, ActivityListener {
             protected void onPostExecute(ExchangeRate[] rates) {
                 Log.d("WebService", String.format("Updating [%d] commodity rates.", rates.length));
                 for (ExchangeRate rate : rates)
-                    mContract.updateExchangeRate("ExchangeRates", rate.To, rate.Rates, rate.Changes, rate.LastUpdate);
+                    mContract.updateExchangeRate("ExchangeRates", rate.To, rate.Rates, rate.Changes, rate.LastUpdate, rate.ToFlagURL);
 
                 hideProgress();
-                sendBroadcast(new Intent("DataChange"));
+                LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(new Intent("DataChange"));
             }
         }.execute(ratesString);
     }
@@ -343,6 +331,7 @@ ActionBar.TabListener, ActivityListener {
         public String[] Rates;
         public Double Changes = 0.0;
         public String LastUpdate = new SimpleDateFormat(ExchangeRateContract.ExchangeEntry.DATE_FORMAT).format(new Date());
+        public String ToFlagURL = "";
     }
 	/**
 	 * A {@link FragmentPagerAdapter} that returns a fragment corresponding to
@@ -422,32 +411,27 @@ ActionBar.TabListener, ActivityListener {
 		public PlaceholderFragment() {
 		}
 
-		@Override
-		public void onStart() {
-			super.onStart();
-		};
-
         @Override
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
 
             mBroadcastReceiver = new FragmentReceiver();
+
+            LocalBroadcastManager.getInstance(getActivity()).registerReceiver(
+                    mBroadcastReceiver, new IntentFilter("DataChange")
+            );
         }
 
         @Override
         public void onAttach(Activity activity) {
            super.onAttach(activity);
-
-            LocalBroadcastManager.getInstance(getActivity()).registerReceiver(
-                mBroadcastReceiver, new IntentFilter("DataChange")
-            );
         }
 
         @Override
         public void onDetach() {
-            LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(mBroadcastReceiver);
-
             super.onDetach();
+
+            LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(mBroadcastReceiver);
         }
 
 
@@ -457,8 +441,7 @@ ActionBar.TabListener, ActivityListener {
 
             final View rootView;
             ListView list = null;
-            mContract = new ExchangeRateContract(
-                    getActivity());
+            mContract = new ExchangeRateContract(getActivity());
             mContract.open();
 
             sectionType = Type.values()[getArguments().getInt(ARG_SECTION_TYPE)];
@@ -468,10 +451,12 @@ ActionBar.TabListener, ActivityListener {
                     ExchangeRateContract.ExchangeEntry.COLUMN_NAME_VALUE1,
                     ExchangeRateContract.ExchangeEntry.COLUMN_NAME_VALUE2,
                     ExchangeRateContract.ExchangeEntry.COLUMN_NAME_CHANGES,
-                    ExchangeRateContract.ExchangeEntry.COLUMN_NAME_LAST_UPDATE,};
+                    ExchangeRateContract.ExchangeEntry.COLUMN_NAME_LAST_UPDATE,
+                    ExchangeRateContract.ExchangeEntry.COLUMN_NAME_FLAG_URL,
+            };
             int[] viewIds = {R.id.commodity_title, R.id.commodity_buy_price,
                     R.id.commodity_sell_price, R.id.commodity_change_price,
-                    R.id.commodity_last_update};
+                    R.id.commodity_last_update, R.id.country_flag_image};
 
             switch (sectionType) {
                 case ExchangeRate:
@@ -515,9 +500,11 @@ ActionBar.TabListener, ActivityListener {
         public class FragmentReceiver extends BroadcastReceiver {
             @Override
             public void onReceive(Context context, Intent intent) {
-                Log.d("Fragment", "Got it!");
-                if(PlaceholderFragment.this.mAdapter != null) {
-                    PlaceholderFragment.this.mAdapter.changeCursor(mContract.getCommoditiesByCategory("ExchangeRates"));
+                if (intent.getAction() != null && intent.getAction().equals("DataChange")) {
+                    Log.d("Fragment", "Got it!");
+                    if (PlaceholderFragment.this.mAdapter != null) {
+                        PlaceholderFragment.this.mAdapter.changeCursor(mContract.getCommoditiesByCategory("ExchangeRates"));
+                    }
                 }
             }
         }

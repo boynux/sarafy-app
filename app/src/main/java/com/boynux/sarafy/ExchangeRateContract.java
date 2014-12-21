@@ -35,7 +35,8 @@ public class ExchangeRateContract {
 			+ TEXT_TYPE + COMMA_SEP + ExchangeEntry.COLUMN_NAME_VALUE3
 			+ TEXT_TYPE + COMMA_SEP + ExchangeEntry.COLUMN_NAME_LAST_UPDATE
             + DATE_TIME_TYPE +  COMMA_SEP + ExchangeEntry.COLUMN_NAME_CHANGES
-            + DOUBLE_TYPE + ")";
+            + DOUBLE_TYPE + COMMA_SEP + ExchangeEntry.COLUMN_NAME_FLAG_URL
+            + TEXT_TYPE + ")";
 
 	private static final String SQL_DELETE_ENTRIES = "DROP TABLE IF EXISTS "
 			+ ExchangeEntry.TABLE_NAME;
@@ -55,8 +56,9 @@ public class ExchangeRateContract {
 				ExchangeEntry.COLUMN_NAME_VALUE1,
 				ExchangeEntry.COLUMN_NAME_VALUE2,
 				ExchangeEntry.COLUMN_NAME_VALUE3,
-                 ExchangeEntry.COLUMN_NAME_CHANGES,
-                ExchangeEntry.COLUMN_NAME_LAST_UPDATE },
+                ExchangeEntry.COLUMN_NAME_CHANGES,
+                ExchangeEntry.COLUMN_NAME_LAST_UPDATE,
+                ExchangeEntry.COLUMN_NAME_FLAG_URL },
 				ExchangeEntry.COLUMN_NAME_CATEGORY + "= ?",
 				new String[] { cat }, null, null, null, null);
 
@@ -64,7 +66,7 @@ public class ExchangeRateContract {
 	}
 
 	public boolean updateExchangeRate(String cat, String title,
-			String[] commodityValues, Double changes, String lastUpdate) {
+			String[] commodityValues, Double changes, String lastUpdate, String flagUrl) {
 		Cursor cursor = mDb.query(true, ExchangeEntry.TABLE_NAME,
 				new String[] { ExchangeEntry.COLUMN_NAME_ID },
 				ExchangeEntry.COLUMN_NAME_CATEGORY + "= ? AND " + ExchangeEntry.COLUMN_NAME_TITLE + "= ?",
@@ -78,6 +80,7 @@ public class ExchangeRateContract {
 		values.put(ExchangeEntry.COLUMN_NAME_VALUE3, commodityValues.length > 2  ? commodityValues[2] : "-");
         values.put(ExchangeEntry.COLUMN_NAME_CHANGES, changes);
         values.put(ExchangeEntry.COLUMN_NAME_LAST_UPDATE, lastUpdate);
+        values.put(ExchangeEntry.COLUMN_NAME_FLAG_URL, flagUrl);
 
 		if (cursor.moveToFirst()) {
 			mDb.update(ExchangeEntry.TABLE_NAME, values, ExchangeEntry.COLUMN_NAME_ID + "=" + cursor.getLong(0), null);
@@ -90,7 +93,7 @@ public class ExchangeRateContract {
 	}
 
 	public class ExchangeRateDbHelper extends SQLiteOpenHelper {
-		public static final int DATABASE_VERSION = 4;
+		public static final int DATABASE_VERSION = 5;
         public static final String DATABASE_NAME = "ExchangeRate.db";
 
         public ExchangeRateDbHelper(Context context) {
@@ -127,5 +130,6 @@ public class ExchangeRateContract {
         public static final String COLUMN_NAME_VALUE3 = "value3";
         public static final String COLUMN_NAME_CHANGES = "changes";
         public static final String COLUMN_NAME_LAST_UPDATE = "last_update";
+        public static final String COLUMN_NAME_FLAG_URL = "flag_url";
 	}
 }

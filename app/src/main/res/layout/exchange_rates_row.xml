@@ -7,6 +7,7 @@
     android:paddingRight="15dp">
 
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/card_row_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@drawable/selector_card_background"
@@ -17,17 +18,32 @@
         android:paddingRight="15dp"
         android:paddingTop="15dp">
 
-        <TextView
-            android:id="@+id/commodity_title"
+        <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:textStyle="bold"
-            android:layout_marginBottom="5dp"/>
+            android:layout_marginBottom="5dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <TextView
+                android:id="@+id/commodity_title"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:textStyle="bold"
+                android:layout_gravity="bottom"
+                android:layout_weight="1"/>
+            <ImageView
+                android:id="@+id/country_flag_image"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_gravity="bottom"
+                android:layout_weight="0" />
+
+        </LinearLayout>
 
         <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:paddingBottom="3dp">
 
