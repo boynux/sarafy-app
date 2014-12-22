@@ -173,6 +173,10 @@ ActionBar.TabListener, ActivityListener {
                 return true;
             case R.id.action_refresh:
                 refresh();
+            case R.id.action_disclaimer:
+                Intent disclaimer = new Intent(this, Disclaimer.class);
+                startActivity(disclaimer);
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -227,7 +231,7 @@ ActionBar.TabListener, ActivityListener {
 
         // TODO: Consider moving this expression into related Fragment itself.
         //       Might be easier to implement and communicate with Fragment.
-        new AsyncTask<String, Void, ExchangeRate[]> () {
+        new AsyncTask<String, Void, Boolean> () {
 
             @Override
             protected void onPreExecute() {
@@ -235,7 +239,7 @@ ActionBar.TabListener, ActivityListener {
             }
 
             @Override
-            protected ExchangeRate[] doInBackground(String... params) {
+            protected Boolean doInBackground(String... params) {
                 try {
                     JSONArray json = new JSONArray(params[0]);
                     ArrayList<ExchangeRate> result = new ArrayList<ExchangeRate>();
@@ -259,8 +263,12 @@ ActionBar.TabListener, ActivityListener {
                         result.add(rate);
                     }
 
-                    ExchangeRate[] rates = new ExchangeRate[result.size()];
-                    return result.toArray(rates);
+                    Log.d("WebService", String.format("Updating [%d] commodity rates.", result.size()));
+
+                    for (ExchangeRate rate : result)
+                        mContract.updateExchangeRate("ExchangeRates", rate.To, rate.Rates, rate.Changes, rate.LastUpdate, rate.ToFlagURL);
+
+                    return true;
                 } catch (JSONException e) {
                     Logger.getAnonymousLogger().warning(String.format("Can not fetch information from provided json object! [%s]", e));
                 }
@@ -268,17 +276,16 @@ ActionBar.TabListener, ActivityListener {
                 // TODO: inform user about the incident!
                 Log.e("WebService", "Could not fetch information from json object.");
 
-                return new ExchangeRate[0];
+
+                return false;
             }
 
             @Override
-            protected void onPostExecute(ExchangeRate[] rates) {
-                Log.d("WebService", String.format("Updating [%d] commodity rates.", rates.length));
-                for (ExchangeRate rate : rates)
-                    mContract.updateExchangeRate("ExchangeRates", rate.To, rate.Rates, rate.Changes, rate.LastUpdate, rate.ToFlagURL);
+            protected void onPostExecute(Boolean success) {
 
                 hideProgress();
-                LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(new Intent("DataChange"));
+                if(success)
+                    LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(new Intent("DataChange"));
             }
         }.execute(ratesString);
     }

@@ -5,6 +5,7 @@
     android:versionName="1.0" >
 
     <uses-permission android:name="android.permission.INTERNET" />
+
     <uses-sdk
         android:minSdkVersion="7"
         android:targetSdkVersion="19" />
@@ -24,8 +25,14 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".AsyncHttpRequest"
-            android:label="@string/title_activity_retrieve_prices_task" >
+            android:name=".Disclaimer"
+            android:label="@string/title_activity_disclaimer"
+            android:parentActivityName="com.boynux.sarafy.PriceList" >
+            <!-- Parent activity meta-data to support 4.0 and lower -->
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.boynux.sarafy.PriceList" />
+
         </activity>
     </application>
 
