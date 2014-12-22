@@ -51,6 +51,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -173,6 +174,7 @@ ActionBar.TabListener, ActivityListener {
                 return true;
             case R.id.action_refresh:
                 refresh();
+                return true;
             case R.id.action_disclaimer:
                 Intent disclaimer = new Intent(this, Disclaimer.class);
                 startActivity(disclaimer);
@@ -193,18 +195,8 @@ ActionBar.TabListener, ActivityListener {
     }
 
     public void showAlertDialog(String title, String message) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setMessage(message);
-        builder.setTitle(title);
-        builder.setPositiveButton("OK",new DialogInterface.OnClickListener() {
-
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-                ;
-            }
-        });
-
-        builder.create().show();
+        Log.d("PriceList", message);
+        Toast.makeText(this, message, Toast.LENGTH_LONG).show();    
     }
 	@Override
 	public void onTabSelected(ActionBar.Tab tab,
