@@ -493,7 +493,7 @@ ActionBar.TabListener, ActivityListener {
             }
 
             if (list != null) {
-                final CursorWrapper cursorWrapper = new CursorWrapper(mCursor);
+                final CursorWrapper cursorWrapper = new AdCursorWrapper(mCursor);
 
                 mAdapter = new SimpleCursorAdapter(getActivity(),
                         R.layout.exchange_rates_row, cursorWrapper, dataColumns,
@@ -553,38 +553,9 @@ ActionBar.TabListener, ActivityListener {
                 if (intent.getAction() != null && intent.getAction().equals("DataChange")) {
                     Log.d("Fragment", "Got it!");
                     if (PlaceholderFragment.this.mAdapter != null) {
-                        CursorWrapper cursorWrapper = new CursorWrapper(mContract.getCommoditiesByCategory("ExchangeRates")) {
-                            final int advPosition = new Random().nextInt(super.getCount());
-                            int currentPosition = -1;
-
-                            @Override
-                            public int getCount() {
-                                return super.getCount() + 1;
-                            }
-
-                            @Override
-                            public String getString(int columnIndex) {
-                                if (currentPosition == advPosition) {
-                                    return "ADVERT";
-                                }
-
-                                return super.getString(columnIndex);
-                            }
-
-                            @Override
-                            public boolean moveToPosition(int position) {
-                                Log.d("Cursor", String.format("Requested Position: %d and ad position %d", position, advPosition));
-                                int realPosition = currentPosition = position;
-
-                                if (position > advPosition) {
-                                    realPosition--;
-                                }
-
-                                return super.moveToPosition(realPosition);
-                            }
-                        };
-
-                        PlaceholderFragment.this.mAdapter.changeCursor(cursorWrapper);
+                        PlaceholderFragment.this.mAdapter.changeCursor(
+                            new AdCursorWrapper(mContract.getCommoditiesByCategory("ExchangeRates"))
+                        );
                     }
                 }
             }
