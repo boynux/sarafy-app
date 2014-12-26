@@ -5,7 +5,7 @@ android {
     buildToolsVersion '20.0.0'
     defaultConfig {
         applicationId 'com.boynux.sarafy'
-        minSdkVersion 7
+        minSdkVersion 9
         targetSdkVersion 19
     }
     buildTypes {
@@ -20,4 +20,5 @@ android {
 
 dependencies {
     compile 'com.android.support:appcompat-v7:20.0.0'
+    compile 'com.google.android.gms:play-services:6.+'
 }

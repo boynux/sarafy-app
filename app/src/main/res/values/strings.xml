@@ -16,16 +16,9 @@
     <string name="title_activity_retrieve_prices_task">RetrievePricesTask</string>
     <string name="hello_world">Hello world!</string>
     <string name="refresh_action_description">Refresh action</string>
-    <string name="disclaimer_text">        THIS APPLICATION IS PROVIDED AS-IS.
-        ALL DATA PROVIDED HERE ARE COLLECTED FROM VARIOUS SOURCES FROM INTERNET AND WE DON NOT GUARANTEE ITS TRUTH.
-        THIS APPLICATION MIGHT NOT FIT TO ANY PARTICULAR PURPOSE.
-        BY USING THIS APP YOU ACCEPT ALL TERMS AND CONDITIONS.
-        WE AS DEVELOPER OF THIS APPLICATION DO NOT ACCEPT ANY LIABILITY
-        OF ANY KIND FOR AMY KID OF DAMAGE OR LOSS CAUSED DIRECTLY OR INDIRECTLY FROM USING THIS APPLICATION.
-        WE SHALL STOP SUPPORTING THIS APPLICATION AND STOP TO PROVIDED UPDATED INFORMATION FOR THIS APPLICATION
-        WITHOUT ANY PRIOR NOTICE AND WITHOUT PROVIDING ANY PARTICULAR REASON.
-        USING IT AT YOUR OWN RISK.</string>
+    <string name="disclaimer_text"></string>
     <string name="commodity_last_update">Last update: </string>
     <string name="title_activity_disclaimer">Disclaimer</string>
+    <string name="banner_ad_unit_id">ca-app-pub-3940256099942544/6300978111</string>
 
 </resources>

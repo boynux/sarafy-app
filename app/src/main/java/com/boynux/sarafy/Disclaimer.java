@@ -42,7 +42,7 @@ public class Disclaimer extends ActionBarActivity {
             }
         });
 
-        view.loadUrl(getResources().getString(R.string.disclaimerUrl));
+        view.loadUrl(getString(R.string.disclaimerUrl));
     }
 
     @Override

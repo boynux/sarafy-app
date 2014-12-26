@@ -6,6 +6,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Locale;
+import java.util.Random;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Logger;
 import java.util.zip.DataFormatException;
@@ -20,6 +21,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.Cursor;
+import android.database.CursorWrapper;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
@@ -52,6 +54,12 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdSize;
+import com.google.android.gms.ads.AdView;
+import com.google.android.gms.ads.doubleclick.PublisherAdRequest;
+import com.google.android.gms.ads.doubleclick.PublisherAdView;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -196,7 +204,7 @@ ActionBar.TabListener, ActivityListener {
 
     public void showAlertDialog(String title, String message) {
         Log.d("PriceList", message);
-        Toast.makeText(this, message, Toast.LENGTH_LONG).show();    
+        Toast.makeText(this, message, Toast.LENGTH_LONG).show();
     }
 	@Override
 	public void onTabSelected(ActionBar.Tab tab,
@@ -354,7 +362,7 @@ ActionBar.TabListener, ActivityListener {
 		@Override
 		public int getCount() {
 			// Show 3 total pages.
-			return 2;
+			return 1;
 		}
 
 		@Override
@@ -393,6 +401,7 @@ ActionBar.TabListener, ActivityListener {
 		private ExchangeRateContract mContract;
 		private Cursor mCursor;
         private BroadcastReceiver mBroadcastReceiver;
+        private View mAdView;
 		/**
 		 * mDbHelper Returns a new instance of this fragment for the given
 		 * section number.
@@ -484,9 +493,51 @@ ActionBar.TabListener, ActivityListener {
             }
 
             if (list != null) {
+                final CursorWrapper cursorWrapper = new CursorWrapper(mCursor);
+
                 mAdapter = new SimpleCursorAdapter(getActivity(),
-                        R.layout.exchange_rates_row, mCursor, dataColumns,
-                        viewIds, 0);
+                        R.layout.exchange_rates_row, cursorWrapper, dataColumns,
+                        viewIds, 0){
+
+                    @Override
+                    public int getViewTypeCount() {
+                        return 2;
+                    }
+
+                    @Override
+                    public int getItemViewType(int position) {
+                        if(((Cursor)getItem(position)).getString(0).equals("ADVERT")) {
+                            return 1;
+                        }
+
+                        return 0;
+                    }
+
+                    @Override
+                    public View newView(Context context, Cursor cursor, ViewGroup parent) {
+                        if (cursor.getString(0) == "ADVERT") {
+
+                            Log.d("Binder", "Showing advertisement!");
+
+                            if (mAdView == null) {
+                                LayoutInflater inflater = (LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                                mAdView = inflater.inflate(R.layout.ad_banner_card, null);
+                                AdView adView = (AdView) mAdView.findViewById(R.id.adView);
+
+                                AdRequest adRequest = new AdRequest.Builder()
+                                        .addTestDevice("51B1D8C3AE319654FF77B3D5606B662E")
+                                        .addTestDevice(AdRequest.DEVICE_ID_EMULATOR)
+                                        .build();
+
+                                adView.loadAd(adRequest);
+                            }
+
+                            return mAdView;
+                        }
+
+                        return super.newView(context, cursor, parent);
+                    }
+                };
 
                 mAdapter.setViewBinder(new ExchangeRateBinder());
 
@@ -502,7 +553,38 @@ ActionBar.TabListener, ActivityListener {
                 if (intent.getAction() != null && intent.getAction().equals("DataChange")) {
                     Log.d("Fragment", "Got it!");
                     if (PlaceholderFragment.this.mAdapter != null) {
-                        PlaceholderFragment.this.mAdapter.changeCursor(mContract.getCommoditiesByCategory("ExchangeRates"));
+                        CursorWrapper cursorWrapper = new CursorWrapper(mContract.getCommoditiesByCategory("ExchangeRates")) {
+                            final int advPosition = new Random().nextInt(super.getCount());
+                            int currentPosition = -1;
+
+                            @Override
+                            public int getCount() {
+                                return super.getCount() + 1;
+                            }
+
+                            @Override
+                            public String getString(int columnIndex) {
+                                if (currentPosition == advPosition) {
+                                    return "ADVERT";
+                                }
+
+                                return super.getString(columnIndex);
+                            }
+
+                            @Override
+                            public boolean moveToPosition(int position) {
+                                Log.d("Cursor", String.format("Requested Position: %d and ad position %d", position, advPosition));
+                                int realPosition = currentPosition = position;
+
+                                if (position > advPosition) {
+                                    realPosition--;
+                                }
+
+                                return super.moveToPosition(realPosition);
+                            }
+                        };
+
+                        PlaceholderFragment.this.mAdapter.changeCursor(cursorWrapper);
                     }
                 }
             }
