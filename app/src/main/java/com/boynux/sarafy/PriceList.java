@@ -6,29 +6,18 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Locale;
-import java.util.Random;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Logger;
 import java.util.zip.DataFormatException;
 
-import android.annotation.TargetApi;
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.Cursor;
 import android.database.CursorWrapper;
-import android.graphics.drawable.ColorDrawable;
-import android.graphics.drawable.Drawable;
-import android.graphics.drawable.GradientDrawable;
-import android.graphics.drawable.LayerDrawable;
-import android.graphics.drawable.ShapeDrawable;
-import android.graphics.drawable.shapes.RectShape;
-import android.graphics.drawable.shapes.RoundRectShape;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -49,17 +38,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.TextView;
 import android.widget.Toast;
-
-import com.google.android.gms.ads.AdRequest;
-import com.google.android.gms.ads.AdSize;
-import com.google.android.gms.ads.AdView;
-import com.google.android.gms.ads.doubleclick.PublisherAdRequest;
-import com.google.android.gms.ads.doubleclick.PublisherAdView;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -495,50 +475,9 @@ ActionBar.TabListener, ActivityListener {
             if (list != null) {
                 final CursorWrapper cursorWrapper = new AdCursorWrapper(mCursor);
 
-                mAdapter = new SimpleCursorAdapter(getActivity(),
+                mAdapter = new AdExtendedCursorAdapter(getActivity(),
                         R.layout.exchange_rates_row, cursorWrapper, dataColumns,
-                        viewIds, 0){
-
-                    @Override
-                    public int getViewTypeCount() {
-                        return 2;
-                    }
-
-                    @Override
-                    public int getItemViewType(int position) {
-                        if(((Cursor)getItem(position)).getString(0).equals("ADVERT")) {
-                            return 1;
-                        }
-
-                        return 0;
-                    }
-
-                    @Override
-                    public View newView(Context context, Cursor cursor, ViewGroup parent) {
-                        if (cursor.getString(0) == "ADVERT") {
-
-                            Log.d("Binder", "Showing advertisement!");
-
-                            if (mAdView == null) {
-                                LayoutInflater inflater = (LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                                mAdView = inflater.inflate(R.layout.ad_banner_card, null);
-                                AdView adView = (AdView) mAdView.findViewById(R.id.adView);
-
-                                AdRequest adRequest = new AdRequest.Builder()
-                                        .addTestDevice("51B1D8C3AE319654FF77B3D5606B662E")
-                                        .addTestDevice(AdRequest.DEVICE_ID_EMULATOR)
-                                        .build();
-
-                                adView.loadAd(adRequest);
-                            }
-
-                            return mAdView;
-                        }
-
-                        return super.newView(context, cursor, parent);
-                    }
-                };
-
+                        viewIds, 0);
                 mAdapter.setViewBinder(new ExchangeRateBinder());
 
                 list.setAdapter(mAdapter);
