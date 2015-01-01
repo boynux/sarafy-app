@@ -11,12 +11,13 @@
         style="@android:style/Widget.ActionButton"
         android:actionLayout="@layout/refresh_action_view"
         android:title="@string/action_refresh"/>
+    <!--
     <item
         android:id="@+id/action_settings"
         android:orderInCategory="100"
         android:title="@string/action_settings"
         app:showAsAction="never"/>
-
+    -->
     <item
         android:id="@+id/action_disclaimer"
         android:orderInCategory="100"

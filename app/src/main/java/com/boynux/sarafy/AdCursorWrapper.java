@@ -16,11 +16,19 @@ public class AdCursorWrapper extends CursorWrapper {
     public AdCursorWrapper(Cursor cursor) {
         super(cursor);
 
-        advPosition = new Random().nextInt(super.getCount());
+        if (super.getCount() == 0) {
+            advPosition = 0;
+        } else {
+            advPosition = new Random().nextInt(super.getCount());
+        }
     }
 
     @Override
     public int getCount() {
+        if (super.getCount() == 0) {
+            return 0;
+        }
+
         return super.getCount() + 1;
     }
 

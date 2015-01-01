@@ -18,5 +18,9 @@
     <string name="refresh_action_description">Refresh action</string>
     <string name="disclaimer_text"></string>
     <string name="commodity_last_update">آخرین بروزرسانی: </string>
+    <string name="title_activity_disclaimer">سلب مسولیت</string>
+
+    <string name="banner_ad_unit_id">ca-app-pub-7360583392867579/7447266846</string>
+    <string name="disclaimerUrl">http://forward-liberty-225.appspot.com/disclaimer</string>
 
 </resources>
