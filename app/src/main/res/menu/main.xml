@@ -24,5 +24,12 @@
         android:title="@string/title_activity_disclaimer"
         app:showAsAction="never"
         android:actionLayout="@layout/activity_disclaimer"/>
+    <item
+        android:id="@+id/action_copyright"
+        android:orderInCategory="100"
+        android:title="@string/title_activity_copyright"
+        app:showAsAction="never"
+        android:actionLayout="@layout/activity_copyright"/>
+
 
 </menu>

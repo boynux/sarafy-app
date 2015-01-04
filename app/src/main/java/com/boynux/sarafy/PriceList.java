@@ -165,6 +165,10 @@ ActionBar.TabListener, ActivityListener {
                 Intent disclaimer = new Intent(this, Disclaimer.class);
                 startActivity(disclaimer);
                 return true;
+            case R.id.action_copyright:
+                Intent copyright = new Intent(this, Copyright.class);
+                startActivity(copyright);
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -173,7 +177,7 @@ ActionBar.TabListener, ActivityListener {
     public void refresh() {
         try {
             AsyncHttpRequest request = new AsyncHttpRequest(this);
-            request.execute("http://forward-liberty-225.appspot.com/exchange-rates/average");
+            request.execute(getString(R.string.webserviceUrl));
         } catch(Exception e) {
             e.printStackTrace();
             Logger.getAnonymousLogger().warning(String.format("could not retrieve rates online [%s]", e.toString()));

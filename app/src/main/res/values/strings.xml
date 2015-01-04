@@ -20,5 +20,6 @@
     <string name="commodity_last_update">Last update: </string>
     <string name="title_activity_disclaimer">Disclaimer</string>
     <string name="banner_ad_unit_id">ca-app-pub-7360583392867579/7447266846</string>
+    <string name="title_activity_copyright">Copyright</string>
 
 </resources>
