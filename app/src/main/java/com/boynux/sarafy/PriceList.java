@@ -438,13 +438,12 @@ ActionBar.TabListener, ActivityListener {
 
             String[] dataColumns = {
                     ExchangeRateContract.ExchangeEntry.COLUMN_NAME_TITLE,
-                    ExchangeRateContract.ExchangeEntry.COLUMN_NAME_VALUE1,
                     ExchangeRateContract.ExchangeEntry.COLUMN_NAME_VALUE2,
                     ExchangeRateContract.ExchangeEntry.COLUMN_NAME_CHANGES,
                     ExchangeRateContract.ExchangeEntry.COLUMN_NAME_LAST_UPDATE,
                     ExchangeRateContract.ExchangeEntry.COLUMN_NAME_FLAG_URL,
             };
-            int[] viewIds = {R.id.commodity_title, R.id.commodity_buy_price,
+            int[] viewIds = {R.id.commodity_title,
                     R.id.commodity_sell_price, R.id.commodity_change_price,
                     R.id.commodity_last_update, R.id.country_flag_image};
 
