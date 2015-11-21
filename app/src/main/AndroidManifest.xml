@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Note that the true APK package name comes from the build.gradle file, not from this
+     entry for manifest. For more details, see:
+     http://tools.android.com/tech-docs/new-build-system/applicationid-vs-packagename
+     -->
+
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.boynux.zagros" >
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+
+    <application
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:theme="@style/AppTheme"
+        android:name="android.support.multidex.MultiDexApplication"
+        >
+        <activity
+            android:name="com.boynux.zagros.SplashActivity"
+            android:label="@string/app_name"
+            android:configChanges="keyboard|keyboardHidden|orientation|screenSize">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name="com.boynux.zagros.SignInActivity"
+            android:label="@string/title_activity_sign_in"
+            android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
+            >
+        </activity>
+        <activity
+            android:name="com.boynux.zagros.MainActivity"
+            android:label="@string/title_activity_main">
+        </activity>
+
+         <!-- BEGIN - FACEBOOK SIGN-IN -->
+
+        <activity
+            android:name="com.facebook.FacebookActivity"
+            android:configChanges="keyboard|keyboardHidden|screenLayout|screenSize|orientation"
+            android:label="@string/app_name"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
+
+        <meta-data android:name="com.facebook.sdk.ApplicationId" android:value="@string/facebook_app_id" />
+
+         <!-- END - FACEBOOK SIGN-IN -->
+
+    </application>
+</manifest>

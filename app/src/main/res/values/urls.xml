@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="webserviceUrl">http://zagros.boynux.com/exchange-rates/average</string>
+    <string name="disclaimerUrl">http://zagros.boynux.com/disclaimer</string>
+    <string name="copyrightUrl">http://zagros.boynux.com/copyright</string>
+</resources>

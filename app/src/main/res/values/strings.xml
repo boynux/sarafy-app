@@ -1,0 +1,94 @@
+<resources>
+
+  <!-- CUSTOMIZE THESE FOR YOUR APP -->
+
+  <string name="app_name">Zagros</string>
+  <string name="facebook_app_id">198540340485053</string> 
+  
+  <!-- REQUIRED FOR GENERAL APP FUNCTIONALITY - YOU MAY WANT TO KEEP THESE -->
+
+  <string name="main_nav_menu_item_home">Home</string>
+  <string name="title_activity_item_detail">Item Detail</string>
+  <string name="title_activity_item_list">Item List</string>
+  <string name="title_activity_main">@string/app_name</string>
+  <string name="title_activity_sign_in">Sign-in</string>
+  <string name="button_text_sign_in">SIGN IN</string>
+  <string name="button_text_sign_out">SIGN OUT</string>
+  <string name="main_nav_menu_default_user_text">\u0020\u0020\u0020\u0020\u0020\u0020\u0020\u0020\u0020\u0020\u0020\u0020\u0020\u0020\u0020\u0020\u0020\u0020</string>
+  
+  <!-- USED BY DEMO FEATURES ONLY - YOU CAN DISCARD THESE WITH THE DEMO FOLDER -->
+
+  <string name="fragment_demo_instruction_overview_header">Overview</string>
+  <string name="fragment_demo_instruction_description_header">Sample App Features</string>
+  <string name="feature_sign_in_title">User Sign-in</string>
+  <string name="feature_sign_in_subtitle">Let your users sign in with public identity providers or your own identity system.</string>
+  <string name="feature_sign_in_overview">Whether your users sign in or not, the User sign-in feature configures Amazon Cognito to uniquely identify the user and provide your app the appropriate credentials to access your AWS resources.</string>
+  <string name="feature_sign_in_description">The Sample App demonstrates assignment of a unique identifier for the user, the Amazon Cognito User ID. If optional or mandatory User Sign-in has been enabled in your project, then the Sample App also includes a sign-in screen, with a button for each configured sign-in provider.</string>
+  <string name="feature_sign_in_powered_by">Powered by Amazon Cognito</string>
+  <string name="feature_sign_in_demo_button">Demo User Identity</string>
+  <string name="feature_mobile_analytics_title">App Analytics</string>
+  <string name="feature_mobile_analytics_subtitle">Collect app usage information and analyze key metrics.</string>
+  <string name="feature_mobile_analytics_overview">Amazon Mobile Analytics allows you to collect, visualize, and export app event data. You can track app usage and monetization in the Amazon Mobile Analytics console, or run custom analysis by automatically exporting app events to Amazon S3 and Amazon Redshift.</string>
+  <string name="feature_mobile_analytics_description">The Sample App records user session activity in metrics that may be viewed in the Amazon Mobile Analytics console. It also provides buttons to demonstrate generating a custom or monetization event, which records user activity, such as the sale of an in-app purchase item.</string>
+  <string name="feature_mobile_analytics_powered_by">Powered by Amazon Mobile Analytics</string>
+  <string name="feature_mobile_analytics_demo_button">Demo App Analytics</string>
+  <string name="feature_cloud_logic_title">Cloud Logic</string>
+  <string name="feature_cloud_logic_subtitle">Run backend code in the cloud.</string>
+  <string name="feature_cloud_logic_overview">Run backend code in the cloud.</string>
+  <string name="feature_cloud_logic_description">The Sample App demonstrates the ability of a mobile app to invoke an AWS Lambda function. Enter the name of the function you wish to run and provide a list of request inputs. Invoke the function and see results.</string>
+  <string name="feature_cloud_logic_powered_by">Powered by AWS Lambda</string>
+  <string name="feature_cloud_logic_demo_button">Demo Cloud Logic</string>
+  <string name="main_nav_menu_item_identity_demo">User Identity</string>
+  <string name="main_fragment_title_user_identity">User Identity</string>
+  <string name="main_fragment_subtitle_user_identity">Keep track of users</string>
+  <string name="identity_demo_text_view_description">Displays the user identity.</string>
+  <string name="unknown_user">Guest User</string>
+  <string name="user_id">USER IDENTIFIER</string>
+  <string name="identity_demo_textview_username_description">User\'s name</string>
+  <string name="identity_demo_textview_userid_description">User\'s unique identifier</string>
+  <string name="identity_demo_unknown_identity_text">&lt;UNKNOWN IDENTITY&gt;</string>
+  <string name="identity_demo_dialog_dismiss_text">DISMISS</string>
+  <string name="identity_demo_error_dialog_title">Failed Identity Retrieval</string>
+  <string name="identity_demo_error_message_failed_get_identity">Could not retrieve the user identity:\u0020</string>
+  <string name="main_nav_menu_item_mobile_analytics_demo">Mobile Analytics</string>
+  <string name="main_fragment_title_mobile_analytics">Mobile Analytics</string>
+  <string name="main_fragment_subtitle_mobile_analytics">Understand customer usage</string>
+  <string name="mobile_analytics_long_description">This app has been instrumented with Amazon Mobile Analytics and it will record this session. You can also use the demo buttons below to generate custom and monetization app events. Note that events are batch processed and may take up to 60 minutes to display in the console.</string>
+  <string name="generate_custom_event">CUSTOM</string>
+  <string name="generate_monetization_event">MONETIZATION</string>
+  <string name="main_nav_menu_item_cloud_logic_demo">Cloud Logic</string>
+  <string name="main_fragment_title_cloud_logic">Cloud Logic</string>
+  <string name="main_fragment_subtitle_cloud_logic">Deploy app logic to the cloud.</string>
+  <string name="cloud_logic_function">FUNCTION</string>
+  <string name="cloud_logic_request">REQUEST</string>
+  <string name="cloud_logic_result">RESULT</string>
+  <string name="cloud_logic_reset">RESET</string>
+  <string name="cloud_logic_invoke">INVOKE</string>
+  <string name="cloud_logic_exchange">EXCHANGE</string>
+  <string name="cloud_logic_error_title">Error</string>
+  <string name="cloud_logic_error_dismiss">Dismiss</string>
+
+  <string name="title_section1">Exchange Rates</string>
+  <string name="title_section2">Gold Prices</string>
+  <string name="title_section3">Disclaimer</string>
+  <string name="action_settings">Settings</string>
+  <string name="action_refresh">Refresh</string>
+  <string name="exchange_rates_title">Exchange Rates</string>
+  <string name="gold_prices_title">Gold Prices</string>
+  <string name="commodity_title">Commodity</string>
+  <string name="commodity_sell_price">Sell</string>
+  <string name="commodity_buy_price">Buy</string>
+  <string name="commodity_change_rate">Changes</string>
+  <string name="title_activity_retrieve_prices_task">RetrievePricesTask</string>
+  <string name="hello_world">Hello world!</string>
+  <string name="refresh_action_description">Refresh action</string>
+  <string name="disclaimer_text"></string>
+  <string name="commodity_last_update">Last update: </string>
+  <string name="title_activity_disclaimer">Disclaimer</string>
+  <string name="banner_ad_unit_id">ca-app-pub-7360583392867579/7447266846</string>
+  <string name="title_activity_copyright">Copyright</string>
+  <string name="default_commodity_to">USD</string>
+  <string name="default_ask_rate">53,000</string>
+  <string name="default_commodity_changes">0.00%</string>
+  <string name="default_commodity_from">IRR</string>
+</resources>
