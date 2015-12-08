@@ -236,6 +236,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         if (fragment == null) {
             fragment = Fragment.instantiate(this, fragmentClass.getName());
+            fragment.setRetainInstance(true);
         }
 
         FragmentTransaction transaction = fragmentManager

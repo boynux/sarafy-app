@@ -72,7 +72,7 @@ public class DisclaimerFragment extends Fragment {
                             .getCloudFunctionFactory(getContext())
                             .build(ZagrosProxy.class);
 
-                    return proxy.zagrosDisclaimerContent();
+                    return proxy.zagrosDisclaimerContent(null);
                 } catch (Exception e) {
                     Log.e(LOG_TAG, "Failed to fetch disclaimer content : " + e.getMessage(), e);
 

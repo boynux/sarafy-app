@@ -37,18 +37,5 @@
             android:name="com.boynux.zagros.MainActivity"
             android:label="@string/title_activity_main">
         </activity>
-
-         <!-- BEGIN - FACEBOOK SIGN-IN -->
-
-        <activity
-            android:name="com.facebook.FacebookActivity"
-            android:configChanges="keyboard|keyboardHidden|screenLayout|screenSize|orientation"
-            android:label="@string/app_name"
-            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
-
-        <meta-data android:name="com.facebook.sdk.ApplicationId" android:value="@string/facebook_app_id" />
-
-         <!-- END - FACEBOOK SIGN-IN -->
-
     </application>
 </manifest>

@@ -72,7 +72,7 @@ public class CopyrightFragment extends Fragment {
                             .getCloudFunctionFactory(getContext())
                             .build(ZagrosProxy.class);
 
-                    return proxy.zagrosCopyrightContent();
+                    return proxy.zagrosCopyrightContent(null);
                 } catch (Exception e) {
                     Log.e(LOG_TAG, "Failed to fetch copyright content : " + e.getMessage(), e);
 

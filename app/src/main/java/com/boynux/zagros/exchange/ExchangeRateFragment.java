@@ -41,6 +41,7 @@ public class ExchangeRateFragment extends DemoFragmentBase {
     public View onCreateView(final LayoutInflater inflater, final ViewGroup container,
                              final Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
+
         setHasOptionsMenu(true);
 
         // Inflate the layout for this fragment
@@ -86,6 +87,8 @@ public class ExchangeRateFragment extends DemoFragmentBase {
 
             mRecyclerView.setAdapter(mAdapter);
         }
+
+        processOnlineCommodityRates();
 
         return rootView;
     }
@@ -137,11 +140,15 @@ public class ExchangeRateFragment extends DemoFragmentBase {
         }
     }
 
+    /**
+     * Called when the Fragment is visible to the user.  This is generally
+     * tied to {@link Activity#onStart() Activity.onStart} of the containing
+     * Activity's lifecycle.
+     */
     @Override
-    public void onResume() {
-        processOnlineCommodityRates();
+    public void onStart() {
 
-        super.onResume();
+        super.onStart();
     }
 
     @Override
@@ -175,7 +182,7 @@ public class ExchangeRateFragment extends DemoFragmentBase {
                             .getCloudFunctionFactory(getContext())
                             .build(ZagrosProxy.class);
 
-                    return proxy.zagrosExchangeRates();
+                    return proxy.zagrosExchangeRates(null);
                 } catch (Exception e) {
                     Log.e(LOG_TAG, "Failed to fetch Exchange rates : " + e.getMessage(), e);
 

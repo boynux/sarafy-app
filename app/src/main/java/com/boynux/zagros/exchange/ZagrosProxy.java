@@ -8,14 +8,14 @@ import com.boynux.zagros.exchange.Models.HealthInfo;
  */
 public interface ZagrosProxy {
     @LambdaFunction
-    HealthInfo zagrosHelthCheck();
+    HealthInfo zagrosHelthCheck(String fix);
 
     @LambdaFunction
-    ExchangeRate[] zagrosExchangeRates();
+    ExchangeRate[] zagrosExchangeRates(String fix);
 
     @LambdaFunction
-    String zagrosCopyrightContent();
+    String zagrosCopyrightContent(String fix);
 
     @LambdaFunction
-    String zagrosDisclaimerContent();
+    String zagrosDisclaimerContent(String fix);
 }
